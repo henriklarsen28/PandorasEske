@@ -4,7 +4,7 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "games")
-class Game(
+data class Game(
 
     @Id
     val gameId: String,

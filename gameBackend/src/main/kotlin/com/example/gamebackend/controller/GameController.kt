@@ -1,4 +1,4 @@
-package com.example.gameBackend.controller
+package com.example.gamebackend.controller
 
 import Game
 import GameService
@@ -7,13 +7,13 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.http.ResponseEntity
 
 
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.GetMapping
+//import org.springframework.web.bind.annotation.PostMapping
+//import org.springframework.web.bind.annotation.GetMapping
 
 
 //import com.example.gameBackend.models.Game
 //import com.example.gameBackend.models.Question
-//import com.example.gameBackend.service.GameService
+//import com.example.gamebackend.service.GameService
 
 @RestController
 @RequestMapping("/api/game")

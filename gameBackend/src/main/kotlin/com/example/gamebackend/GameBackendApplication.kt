@@ -1,4 +1,4 @@
-package com.example.gameBackend
+package com.example.gamebackend
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
