@@ -1,2 +1,5 @@
 __pycache__
+gameBackend/build/*
 .DS_Store
+gameBackend/.gradle/*
+.idea
