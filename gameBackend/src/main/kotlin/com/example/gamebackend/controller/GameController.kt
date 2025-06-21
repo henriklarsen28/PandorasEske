@@ -29,6 +29,7 @@ class GameController(private val gameService: GameService,
     fun startGame(gameId: String): ResponseEntity<Boolean> {
         // Set status to true
         val status = gameService.startGame(gameId)
+        println("Game started with ID: $gameId, Status: $status")
         if (status) {
             // Optionally, send a message to Kafka topic
             kafkaProducer.sendMessage("game-started", gameId)
