@@ -24,6 +24,8 @@ class GameService (private val gameRepository: GameRepository,
         return game.status
     }
 
+    fun getGame(gameId: String) = gameRepository.findById(gameId).orElse(null)
+
     fun nameAvailable(gameId: String): Boolean {
         val game = gameRepository.findById(gameId).orElse(null)
         if (game != null) {return true}
