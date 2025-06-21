@@ -8,12 +8,12 @@ import jakarta.persistence.*
 data class Question(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
-    val questionText: String,
-    val toName: String,
+    var id: Long? = null,
+    var questionText: String,
+    var toName: String,
 
     @ManyToOne
     @JoinColumn(name = "game_id")
-    val game: Game,
+    var game: Game,
 
 )

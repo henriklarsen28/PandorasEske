@@ -7,12 +7,12 @@ import jakarta.persistence.*
 data class Game(
 
     @Id
-    val gameId: String,
+    var gameId: String,
 
     @OneToMany
-    val questions : List<Question>,
+    var questions : List<Question>,
 
-    val status: Boolean = false,
+    var status: Boolean = false,
 
     //val index: Int = 0
 )

@@ -20,6 +20,5 @@ interface QuestionRepository : JpaRepository<Question, Long> {
 
     fun findQuestionsByGame(game: Game): List<Question>?
 
-    //fun addQuestionToGame(game: Game, question: Question)
 
 }

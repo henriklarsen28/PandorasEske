@@ -3,6 +3,7 @@ package com.example.gamebackend.controller
 import com.example.gamebackend.models.Game
 import com.example.gamebackend.models.Question
 import com.example.gamebackend.service.GameService
+import org.apache.kafka.common.protocol.types.Field.Bool
 import org.springframework.web.bind.annotation.*
 import org.springframework.http.ResponseEntity
 
@@ -21,12 +22,22 @@ import org.springframework.http.ResponseEntity
 class GameController(private val gameService: GameService) {
 
     @GetMapping("/startGame")
-    fun 
+    fun startGame(gameId: String): ResponseEntity<Boolean> {
+        // Set status to true
+        val status = gameService.startGame(gameId)
+        return ResponseEntity.ok(status)
+    }
 
     @PostMapping("/initGame")
     fun initializeGame(@RequestBody request: String): ResponseEntity<Game> {
         val game = gameService.initGame(request)
         return ResponseEntity.ok(game)
+    }
+
+    @GetMapping("/nameAvailable")
+    fun nameAvailable(gameId: String, name: String): ResponseEntity<Boolean> {
+        val nameIsAvailable = gameService.nameAvailable(gameId)
+        return ResponseEntity.ok(nameIsAvailable)
     }
 
     @PostMapping("/addQuestion")

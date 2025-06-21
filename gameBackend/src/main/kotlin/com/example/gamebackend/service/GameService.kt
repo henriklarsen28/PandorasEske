@@ -13,8 +13,21 @@ class GameService (private val gameRepository: GameRepository,
                   private val questionRepository: QuestionRepository) {
     
     fun initGame(gameId: String): Game? {
-        val game = Game(gameId = gameId, questions = listOf(), status = true)
+        val game = Game(gameId = gameId, questions = listOf(), status = false)
         return gameRepository.save(game)
+    }
+
+    fun startGame(gameId: String): Boolean {
+        var game = gameRepository.findById(gameId).get()
+        game.status = true
+        gameRepository.save(game)
+        return game.status
+    }
+
+    fun nameAvailable(gameId: String): Boolean {
+        val game = gameRepository.findById(gameId).orElse(null)
+        if (game != null) {return true}
+        return false
     }
     
     fun findQuestionsByGameId(gameid: String): List<Question>? {
@@ -29,6 +42,8 @@ class GameService (private val gameRepository: GameRepository,
         questionRepository.save(question)
         return gameRepository.findById(gameId).orElse(null)
     }
+
+
 
 
 }
