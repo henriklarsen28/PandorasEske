@@ -5,14 +5,11 @@ export const Route = createFileRoute('/newgame')({
   component: RouteComponent,
 })
 
-const takenNames = ['test', 'demo', 'henrikg']
-
-function checkNameAvailability(name: string): Promise<boolean> {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(!takenNames.includes(name.toLowerCase()))
-    }, 500)
-  })
+async function checkNameAvailability(name: string): Promise<boolean> {
+  
+  const response = await fetch("http://localhost:8080/api/game/nameAvailable?gameId=" + name)
+  
+  return await response.json()
 }
 
 function RouteComponent() {
@@ -51,8 +48,19 @@ function RouteComponent() {
     setMode(null)
   }
 
-  function handleConfirmMode() {
+  async function handleConfirmMode() {
     if (!mode) return
+    
+    const response = await fetch("http://localhost:8080/api/game/initGame", {
+      method: "POST",
+      body: gameName
+    })
+    
+    const data = await response.json()
+    
+    console.log(data)
+    
+    
     const target = mode === 'manual' ? `/game/${gameName}/question` : `/game/${gameName}`
     navigate({ to: target })
   }
@@ -81,9 +89,9 @@ function RouteComponent() {
       >
         {step === 1 && (
           <>
-            <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Start a New Game</h2>
+            <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Ny Pandoras Eske</h2>
             <label style={{ fontWeight: 500, display: 'block', marginBottom: '0.5rem' }}>
-              Game Name
+              Spillnavn
             </label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <input
@@ -93,7 +101,7 @@ function RouteComponent() {
                   setGameName(e.target.value)
                   setIsAvailable(null)
                 }}
-                placeholder="Enter a game name..."
+                placeholder="Skriv spillnavn her..."
                 style={{
                   flex: 1,
                   padding: '0.75rem 1rem',
@@ -118,7 +126,7 @@ function RouteComponent() {
             </div>
             {isAvailable === false && (
               <p style={{ color: '#e63946', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-                Name is already taken. Try another.
+                Dette spillet finnes allerede
               </p>
             )}
             {isAvailable === true && (
@@ -136,7 +144,7 @@ function RouteComponent() {
                   cursor: 'pointer',
                 }}
               >
-                Confirm Name
+                Velg navn
               </button>
             )}
           </>
@@ -144,9 +152,9 @@ function RouteComponent() {
 
         {step === 2 && (
           <>
-            <h2 style={{ marginBottom: '1rem', textAlign: 'center' }}>Choose Setup Mode</h2>
+            <h2 style={{ marginBottom: '1rem', textAlign: 'center' }}>Velg spillmodus</h2>
             <p style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#555' }}>
-              Game name: <strong>{gameName}</strong>
+              Spillnavn: <strong>{gameName}</strong>
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <label style={radioStyle(mode === 'manual')}>
@@ -158,10 +166,11 @@ function RouteComponent() {
                   onChange={() => setMode('manual')}
                   style={{ display: 'none' }}
                 />
-                <span>🛠️ Make Yourself</span>
+                <span>🛠️ Still spørsmål selv</span>
               </label>
               <label style={radioStyle(mode === 'ai')}>
                 <input
+                  disabled={true}
                   type="radio"
                   name="mode"
                   value="ai"
@@ -169,7 +178,7 @@ function RouteComponent() {
                   onChange={() => setMode('ai')}
                   style={{ display: 'none' }}
                 />
-                <span>🤖 Generate with AI</span>
+                <span>🤖 Generer med AI (Kommer senere)</span>
               </label>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '2rem' }}>
@@ -187,7 +196,7 @@ function RouteComponent() {
                   cursor: mode ? 'pointer' : 'not-allowed',
                 }}
               >
-                Confirm Choice
+                Bekreft valg
               </button>
               <button
                 onClick={handleGoBack}
@@ -202,7 +211,7 @@ function RouteComponent() {
                   cursor: 'pointer',
                 }}
               >
-                ⬅️ Go Back
+                ⬅️ Gå tilbake
               </button>
             </div>
           </>

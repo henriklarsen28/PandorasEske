@@ -4,6 +4,7 @@ plugins {
 	id("org.springframework.boot") version "3.5.3"
 	id("io.spring.dependency-management") version "1.1.7"
 	kotlin("plugin.jpa") version "1.9.0"
+	kotlin("plugin.serialization") version "1.9.25"
 }
 
 group = "com.example"
@@ -37,11 +38,17 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.springframework.kafka:spring-kafka")
 
+	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
 }
 
 kotlin {
 	compilerOptions {
 		freeCompilerArgs.addAll("-Xjsr305=strict")
+
+	}
+	sourceSets.all {
+		languageSettings.optIn("kotlinx.serialization.ExperimentalSerializationApi")
 	}
 }
 

@@ -1,9 +1,23 @@
 import React, { useEffect, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/game/$gameid')({
+export const Route = createFileRoute('/game/gameid')({
   component: RouteComponent,
   loader: async ({ params }) => {
+    
+    const response = await fetch("http://localhost:8000/questions/" + params.gamename)
+    
+    console.log(response)
+    
+    if (response.status === 404) {
+      console.log("Finnes ikke spill" + params.gamename)
+      return { undefined }
+    }
+    
+    const data = await response.json()
+    
+    console.log(data)
+    
     const fake_game = [
       { name:  "Henrik", msg: 'Hei på deg henrikg' },
       { name: "Nicolai", msg: 'Heo på meg' },
@@ -25,6 +39,12 @@ function RouteComponent() {
   const { fake_game } = Route.useLoaderData()
   const [index, setIndex] = useState(0)
   const [bgColor, setBgColor] = useState(getRandomColor())
+  const navigate = useNavigate()
+  
+  if (fake_game === null || fake_game === undefined) {
+    navigate({to: "/"})
+  }
+
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

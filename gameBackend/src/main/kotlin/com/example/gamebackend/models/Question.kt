@@ -1,10 +1,12 @@
 package com.example.gamebackend.models
 
 import jakarta.persistence.*
+import kotlinx.serialization.*
 
 
 @Entity
 @Table(name = "questions")
+@Serializable
 data class Question(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

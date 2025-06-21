@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import React, { useState } from 'react'
 
 export const Route = createFileRoute('/game/$gamename/question')({
@@ -9,11 +9,37 @@ function RegisterForm() {
   const { gamename } = Route.useParams()
   const [name, setName] = useState('')
   const [message, setMessage] = useState('')
+  const navigate = useNavigate()
+  
+  async function activateGame(e: any) {
+    const response = await fetch("http://localhost:8080/api/game/startGame?gameId=" + gamename)
+    
+    console.log(response)
+    
+    if (response.status == 200) {
+      navigate({
+        to: "/game/" + gamename
+      })
+    }
+    
+    
+  }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (name.trim() && message.trim()) {
       console.log({ gamename, name, message }) // replace with actual submit logic
+      
+      const response = await fetch(`http://localhost:8080/api/game/addQuestion?gameId=${gamename}&questionText=${message}&toName=${name}`, {
+        method: "POST"
+      })
+      const data = await response.body
+      
+      setName("")
+      setMessage("")
+      
+      console.log(data)
+      
     }
   }
 
@@ -21,38 +47,42 @@ function RegisterForm() {
     <div style={containerStyle}>
       <div style={cardStyle}>
         <h2 style={titleStyle}>
-          Add question for game <span style={{ color: '#2a9d8f' }}>{gamename}</span>
+          Still spørsmål til esken <span style={{ color: '#2a9d8f' }}>{gamename}</span>
         </h2>
 
       
           <form onSubmit={handleSubmit} style={formStyle}>
             <div>
-              <label style={labelStyle}>Name</label>
+              <label style={labelStyle}>Navn</label>
               <input
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 required
-                placeholder="Your name"
+                placeholder="Still spørsmål til..."
                 style={inputStyle}
               />
             </div>
 
             <div>
-              <label style={labelStyle}>Message</label>
+              <label style={labelStyle}>Spørsmål</label>
               <textarea
                 value={message}
                 onChange={e => setMessage(e.target.value)}
                 required
-                placeholder="A greeting or message"
+                placeholder="Her skriver du spørmålet du ønsker å sille... (Helst grisete som bare det!)"
                 style={{ ...inputStyle, height: '100px' }}
               />
             </div>
 
             <button type="submit" style={buttonStyle}>
-              Submit
+              Send
             </button>
           </form>
+          <br></br>
+          <button type="button" onClick={activateGame} style={buttonStyle2}>
+            Start Spill!
+          </button>
       </div>
     </div>
   )
@@ -114,6 +144,18 @@ const inputStyle: React.CSSProperties = {
 const buttonStyle: React.CSSProperties = {
   padding: '0.75rem',
   backgroundColor: '#2a9d8f',
+  color: '#fff',
+  fontSize: '1rem',
+  border: 'none',
+  borderRadius: '0.5rem',
+  cursor: 'pointer',
+  width: '100%',
+  boxSizing: 'border-box',
+}
+
+const buttonStyle2: React.CSSProperties = {
+  padding: '0.75rem',
+  backgroundColor: '#FD7E14',
   color: '#fff',
   fontSize: '1rem',
   border: 'none',

@@ -9,11 +9,13 @@ import (
 	"net/http"
 	
 	"github.com/redis/go-redis/v9"
+
 	
 	"QuestionBackend/question"
 )
 
 var ctx = context.Background()
+
 
 func main() {
 	// Code
@@ -33,10 +35,14 @@ func main() {
 	}
 	
 	go question.StartKafkaConsumerGameStart(rdb, ctx)
-	// go question.StartKafkaConsumerNewQuestion(rdb, ctx)
+	go question.StartKafkaConsumerNewQuestion(rdb, ctx)
 
 	//blogg.RegisterBlogg(mux)
 
+	question.NewQuestionController(mux, rdb, &ctx)
+	
+	mux.HandleFunc("/ws", question.WebSocketHandler)
+	
 	fmt.Print("Starting server...\n")
 
 	//handler := cors.Default().Handler(mux)

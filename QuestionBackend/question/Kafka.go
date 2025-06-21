@@ -15,8 +15,8 @@ import (
 
 func StartKafkaConsumerGameStart(redis *redis.Client, ctx context.Context) {
 	brokers := []string{"localhost:9092"}
-	topic := "my-topic"
-	groupID := "my-group"
+	topic := "game-started"
+	groupID := "question-backend"
 
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:  brokers,
@@ -44,8 +44,8 @@ func StartKafkaConsumerGameStart(redis *redis.Client, ctx context.Context) {
 
 func StartKafkaConsumerNewQuestion(redis *redis.Client, ctx context.Context) {
 	brokers := []string{"localhost:9092"}
-	topic := "my-topic"
-	groupID := "my-group"
+	topic := "questions"
+	groupID := "question-backend"
 
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:  brokers,
@@ -65,14 +65,17 @@ func StartKafkaConsumerNewQuestion(redis *redis.Client, ctx context.Context) {
 		}
 		log.Printf("Kafka message received: %s\n", string(m.Value))
 		
-		LoadQuestions(string(m.Value), redis, ctx)
+		var newQuestion NewQuestionDto
+		err = json.Unmarshal(m.Value, &newQuestion)
+		
+		UpdateQuestions(newQuestion, redis, ctx)
 
 		// You can process/save/cache the message here
 	}
 }
 
-func UpdateQuestions(game_name string, question Question, redis *redis.Client, ctx context.Context) {
-	questionIndexString, err := GetCache(redis, game_name, ctx)
+func UpdateQuestions(newQuestion NewQuestionDto, redis *redis.Client, ctx context.Context) {
+	questionIndexString, err := GetCache(redis, newQuestion.Game.GameId, ctx)
 	
 	if err != nil {
 		fmt.Errorf("I have no clue", err)
@@ -84,6 +87,8 @@ func UpdateQuestions(game_name string, question Question, redis *redis.Client, c
 		panic(err)
 	}
 	
+	question := Question{newQuestion.QuestionText, newQuestion.ToName, newQuestion.Game}
+	
 	questionIndex.Questions = append(questionIndex.Questions, question)
 	
 	
@@ -93,7 +98,22 @@ func UpdateQuestions(game_name string, question Question, redis *redis.Client, c
 		panic(err)
 	}
 	
-	SetCache(redis,game_name, value, time.Duration(100000000), ctx)
+	SetCache(redis,newQuestion.Game.GameId, value, 100000*time.Hour, ctx)
+	
+	Mutex.Lock()
+	for conn, client := range Clients {
+		if client.Game == question.Game.GameId {
+			err := conn.WriteJSON(question.Game)
+			if err != nil {
+				log.Println("Error writing message:", err)
+				conn.Close()
+				delete(Clients, conn)
+			}
+		}
+	}
+	Mutex.Unlock()
+	
+	fmt.Println("New Question added")
 	
 	
 }
@@ -101,13 +121,20 @@ func UpdateQuestions(game_name string, question Question, redis *redis.Client, c
 func LoadQuestions(game_name string, redis *redis.Client, ctx context.Context) {
 	questions_resp := GetQuestions(game_name)
 	
+	fmt.Println("got questions")
+	
 	questionIndex := &QuestionIndex{questions_resp, 0}
 	
+	fmt.Println(questionIndex)
+	
 	value, err := json.Marshal(questionIndex)
+	
+	fmt.Println(value)
+	fmt.Println(string(value))
 	
 	if err != nil {
 		panic(err)
 	}
 	
-	SetCache(redis, game_name, string(value), time.Duration(100000000), ctx)
+	SetCache(redis, game_name, string(value), 100000*time.Hour, ctx)
 }

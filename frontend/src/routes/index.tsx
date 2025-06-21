@@ -1,14 +1,40 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
 })
 
+async function checkNameAvailability(name: string): Promise<boolean> {
+  
+  const response = await fetch("http://localhost:8080/api/game/nameAvailable?gameId=" + name)
+  
+  return await response.json()
+}
+
 function HomePage() {
   const navigate = useNavigate()
   const [gameCode, setGameCode] = useState('')
+  const [isAvailable, setIsAvailable] = useState<boolean | null>(null)
+  const [isChecking, setIsChecking] = useState(false)
   const [error, setError] = useState('')
+  
+  useEffect(() => {
+    if (!gameCode) {
+      setIsAvailable(null)
+      return
+    }
+
+    setIsChecking(true)
+    const timeout = setTimeout(() => {
+      checkNameAvailability(gameCode).then(result => {
+        setIsAvailable(!result)
+        setIsChecking(false)
+      })
+    }, 300)
+
+    return () => clearTimeout(timeout)
+  }, [gameCode])
 
   const handleJoin = () => {
     if (!gameCode.trim()) {
@@ -25,28 +51,40 @@ function HomePage() {
   return (
     <div style={containerStyle}>
       <div style={cardStyle}>
-        <h1 style={titleStyle}>🎮 Welcome to the Game Hub</h1>
+        <h1 style={titleStyle}>Velkommen til Pandoras Eske</h1>
+        <h2 style={titleStyle2}>Shot or Tell</h2>
 
         <button onClick={handleNewGame} style={{ ...buttonStyle, backgroundColor: '#2a9d8f' }}>
-          ➕ Start New Game
+          ➕ Start et nytt spill
         </button>
 
         <div style={{ marginTop: '2rem', width: '100%' }}>
-          <label style={labelStyle}>Join Existing Game</label>
-          <input
-            type="text"
-            placeholder="Enter game ID"
-            value={gameCode}
-            onChange={e => {
-              setGameCode(e.target.value)
-              setError('')
-            }}
-            style={inputStyle}
-          />
+          <label style={labelStyle}>Stil spørsmål til et eksisterende spill</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <input
+              type="text"
+              placeholder="Spill ID"
+              value={gameCode}
+              onChange={e => {
+                setGameCode(e.target.value)
+                setError('')
+              }}
+              style={inputStyle}
+            />
+            <div style={{ fontSize: '1.25rem' }}>
+              {isChecking ? (
+                <span style={{ color: '#888' }}>⏳</span>
+              ) : isAvailable === true ? (
+                <span style={{ color: '#2a9d8f' }}>✅</span>
+              ) : isAvailable === false ? (
+                <span style={{ color: '#e63946' }}>❌</span>
+              ) : null}
+            </div>
+          </div>
           {error && <p style={{ color: 'red', marginTop: '0.5rem' }}>{error}</p>}
 
           <button onClick={handleJoin} style={{ ...buttonStyle, marginTop: '1rem' }}>
-            🔍 Join Game
+            🔍 Bli med i spillet
           </button>
         </div>
       </div>
@@ -77,6 +115,12 @@ const cardStyle: React.CSSProperties = {
 
 const titleStyle: React.CSSProperties = {
   fontSize: '1.75rem',
+  marginBottom: '2rem',
+  fontWeight: 600,
+}
+
+const titleStyle2: React.CSSProperties = {
+  fontSize: '1.2rem',
   marginBottom: '2rem',
   fontWeight: 600,
 }

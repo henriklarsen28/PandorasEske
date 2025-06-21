@@ -7,7 +7,7 @@ import (
 )
 
 func GetQuestions(game_name string) []Question {
-	resp, err := http.Get("http://localhost:8080/" + game_name)
+	resp, err := http.Get("http://localhost:8080/api/game/getQuestions?gameId=" + game_name)
 	
 	if err != nil {
 		panic(err)

@@ -4,12 +4,14 @@ import (
 	//"encoding/json"
 	//"fmt"
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
 	//"strconv"
 
 	"encoding/json"
+
 	"github.com/redis/go-redis/v9"
 )
 
@@ -22,7 +24,7 @@ type QuestionController struct {
 var global_redis *redis.Client
 var gloal_context *context.Context
 
-func NewBloggController(server *http.ServeMux, redis *redis.Client, context *context.Context) *QuestionController {
+func NewQuestionController(server *http.ServeMux, redis *redis.Client, context *context.Context) *QuestionController {
 
 	gloal_context = context
 	global_redis = redis
@@ -33,7 +35,7 @@ func NewBloggController(server *http.ServeMux, redis *redis.Client, context *con
 	*/
 	
 	server.HandleFunc("GET /questions/{game_name}", GetQuestionsHandler)
-	server.HandleFunc("POST /question/{game_name}",UpdateIndexHandler )
+	server.HandleFunc("POST /question/{game_name}", UpdateIndexHandler )
 
 	return &QuestionController{server, redis, context}
 
@@ -44,8 +46,13 @@ func GetQuestionsHandler(w http.ResponseWriter, r *http.Request) {
 	
 	questionIndexString, err := GetCache(global_redis, game_name, *gloal_context)
 	
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	fmt.Println(questionIndexString)
+	fmt.Println(err)
+	
+	if questionIndexString == "" {
+		fmt.Println(err)
+		//http.NotFound(w, r)
+		http.Error(w, "Not found", http.StatusNotFound)
 		return
 	}
 	
@@ -55,7 +62,7 @@ func GetQuestionsHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	
-	encoded, _ := json.Marshal(questionIndex.Questions)
+	encoded, _ := json.Marshal(questionIndex)
 	
 	_, err = w.Write(encoded)
 	
@@ -99,7 +106,7 @@ func UpdateIndexHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	
-	SetCache(global_redis, game_name, value, time.Duration(100000000), *gloal_context)
+	SetCache(global_redis, game_name, value, 100000*time.Hour, *gloal_context)
 	
 }
 
