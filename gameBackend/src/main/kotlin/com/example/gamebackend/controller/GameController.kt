@@ -25,6 +25,14 @@ class GameController(private val gameService: GameService,
                      private val kafkaProducer: KafkaProducer
 ) {
 
+
+
+    @PostMapping("/initGame")
+    fun initializeGame(@RequestBody request: String): ResponseEntity<Game> {
+        val game = gameService.initGame(request)
+        return ResponseEntity.ok(game)
+    }
+
     @GetMapping("/startGame")
     fun startGame(gameId: String): ResponseEntity<Boolean> {
         // Set status to true
@@ -37,9 +45,10 @@ class GameController(private val gameService: GameService,
         return ResponseEntity.ok(status)
     }
 
-    @PostMapping("/initGame")
-    fun initializeGame(@RequestBody request: String): ResponseEntity<Game> {
-        val game = gameService.initGame(request)
+    @GetMapping("/getGame")
+    fun getGame(gameId: String): ResponseEntity<Game?> {
+        val game = gameService.getGame(gameId)?: return ResponseEntity.notFound().build()
+
         return ResponseEntity.ok(game)
     }
 
