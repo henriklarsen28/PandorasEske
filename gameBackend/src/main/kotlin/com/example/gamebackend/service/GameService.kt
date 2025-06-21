@@ -28,8 +28,7 @@ class GameService (private val gameRepository: GameRepository,
 
     fun nameAvailable(gameId: String): Boolean {
         val game = gameRepository.findById(gameId).orElse(null)
-        if (game != null) {return true}
-        return false
+        return game == null
     }
     
     fun findQuestionsByGameId(gameid: String): List<Question>? {
