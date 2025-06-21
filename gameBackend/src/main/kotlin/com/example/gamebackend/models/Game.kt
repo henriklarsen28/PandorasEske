@@ -1,4 +1,4 @@
-
+package com.example.gamebackend.models
 
 import jakarta.persistence.*
 
@@ -10,7 +10,7 @@ data class Game(
     val gameId: String,
 
     @OneToMany
-    val questions : List<Questions>,
+    val questions : List<Question>,
 
     val status: Boolean = false,
 

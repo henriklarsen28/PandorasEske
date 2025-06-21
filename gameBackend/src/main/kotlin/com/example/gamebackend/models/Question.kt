@@ -1,9 +1,11 @@
+package com.example.gamebackend.models
+
 import jakarta.persistence.*
 
 
 @Entity
 @Table(name = "questions")
-data class Questions(
+data class Question(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
