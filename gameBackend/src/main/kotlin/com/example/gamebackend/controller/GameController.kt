@@ -29,6 +29,7 @@ class GameController(private val gameService: GameService,
     fun startGame(gameId: String): ResponseEntity<Boolean> {
         // Set status to true
         val status = gameService.startGame(gameId)
+        println("Game started with ID: $gameId, Status: $status")
         if (status) {
             // Optionally, send a message to Kafka topic
             kafkaProducer.sendMessage("game-started", gameId)
@@ -51,10 +52,18 @@ class GameController(private val gameService: GameService,
     }
 
     @PostMapping("/addQuestion")
-    fun addQuestionToGame(gameId: String, questionText: String, toName: String): ResponseEntity<Game> {
-        val updatedGame = gameService.addQuestionToGame(gameId, questionText, toName)
+    fun addQuestionToGame(gameId: String, questionText: String, toName: String): ResponseEntity<String> {
+        val addedQuestion = gameService.addQuestionToGame(gameId, questionText, toName)
             ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(updatedGame)
+
+        // Publish message if status is active
+        val game = gameService.getGame(gameId)
+        
+        if (game.status) {
+            kafkaProducer.sendMessageObject("questions", addedQuestion)
+        }
+
+        return ResponseEntity.ok("Question is added")
     }
 
     

@@ -37,11 +37,11 @@ class GameService (private val gameRepository: GameRepository,
         return questions ?: emptyList()
     }
 
-    fun addQuestionToGame(gameId: String, questionText: String, toName: String): Game? {
+    fun addQuestionToGame(gameId: String, questionText: String, toName: String): Question? {
         val game = gameRepository.findById(gameId).orElse(null) ?: return null
         val question = Question (questionText = questionText, game = game, toName = toName)
         questionRepository.save(question)
-        return gameRepository.findById(gameId).orElse(null)
+        return question
     }
 
 
