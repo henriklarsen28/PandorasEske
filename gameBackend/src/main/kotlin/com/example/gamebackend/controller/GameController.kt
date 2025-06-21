@@ -8,15 +8,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.http.ResponseEntity
 
 
-//import org.springframework.web.bind.annotation.PostMapping
-//import org.springframework.web.bind.annotation.GetMapping
-
-
-//import com.example.gameBackend.models.Game
-//import com.example.gameBackend.models.Question
-//import com.example.gamebackend.service.GameService
-
-@CrossOrigin(origins = ["localhost:3000"])
+@CrossOrigin(origins = ["http://localhost:3000"])
 @RestController
 @RequestMapping("/api/game")
 class GameController(private val gameService: GameService) {
@@ -35,7 +27,7 @@ class GameController(private val gameService: GameService) {
     }
 
     @GetMapping("/nameAvailable")
-    fun nameAvailable(gameId: String, name: String): ResponseEntity<Boolean> {
+    fun nameAvailable(gameId: String): ResponseEntity<Boolean> {
         val nameIsAvailable = gameService.nameAvailable(gameId)
         return ResponseEntity.ok(nameIsAvailable)
     }
