@@ -3,6 +3,8 @@ package com.example.gamebackend.controller
 import com.example.gamebackend.models.Game
 import com.example.gamebackend.models.Question
 import com.example.gamebackend.service.GameService
+import com.example.gamebackend.service.KafkaProducer
+
 import org.apache.kafka.common.protocol.types.Field.Bool
 import org.springframework.web.bind.annotation.*
 import org.springframework.http.ResponseEntity
@@ -19,12 +21,19 @@ import org.springframework.http.ResponseEntity
 @CrossOrigin(origins = ["localhost:3000"])
 @RestController
 @RequestMapping("/api/game")
-class GameController(private val gameService: GameService) {
+class GameController(private val gameService: GameService,
+                     private val kafkaProducer: KafkaProducer
+) {
 
     @GetMapping("/startGame")
     fun startGame(gameId: String): ResponseEntity<Boolean> {
         // Set status to true
         val status = gameService.startGame(gameId)
+        if (status) {
+            // Optionally, send a message to Kafka topic
+            kafkaProducer.sendMessage("game-started", gameId)
+        }
+
         return ResponseEntity.ok(status)
     }
 
